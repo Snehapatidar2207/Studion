@@ -1,0 +1,110 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-deep: #0c0d12;
+  --bg-surface: #14151f;
+  --bg-surface-elevated: #1c1e2d;
+  --purple-primary: #8a2be2;
+  --purple-secondary: #9370db;
+  --purple-light: #d8bfd8;
+  --purple-neon: #a855f7;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-purple: rgba(138, 43, 226, 0.35);
+}
+
+body {
+  background-color: #0c0d12;
+  color: #f1f1f5;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #0f1017;
+}
+::-webkit-scrollbar-thumb {
+  background: #2d244a;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #8a2be2;
+}
+
+/* Glassmorphism Classes */
+.glass-panel {
+  background: rgba(20, 21, 31, 0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(138, 43, 226, 0.2);
+}
+
+.glass-panel-hover {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glass-panel-hover:hover {
+  border-color: rgba(168, 85, 247, 0.5);
+  box-shadow: 0 8px 30px -8px rgba(138, 43, 226, 0.35);
+  transform: translateY(-2px);
+}
+
+/* 3D Flashcard flip animation */
+.perspective-1000 {
+  perspective: 1200px;
+}
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+/* Glowing text and borders */
+.text-glow-purple {
+  text-shadow: 0 0 16px rgba(168, 85, 247, 0.6);
+}
+
+.glow-box {
+  box-shadow: 0 0 20px -3px rgba(138, 43, 226, 0.45);
+}
+
+/* Strike-through task animation */
+@keyframes strike-through {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+.strike-animate {
+  position: relative;
+}
+.strike-animate::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 2px;
+  background-color: #9370db;
+  animation: strike-through 0.25s ease-out forwards;
+}
+
+/* Animated subtle gradient mesh */
+.bg-mesh-glow {
+  background-image: 
+    radial-gradient(circle at 15% 20%, rgba(138, 43, 226, 0.12) 0%, transparent 45%),
+    radial-gradient(circle at 85% 65%, rgba(147, 112, 219, 0.09) 0%, transparent 40%),
+    radial-gradient(circle at 50% 90%, rgba(168, 85, 247, 0.08) 0%, transparent 50%);
+}
