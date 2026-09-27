@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { StudionProvider, useStudion } from './context/StudionContext';
 import { Sidebar } from './components/common/Sidebar';
 import { Header } from './components/common/Header';
-import { PomodoroModal } from './components/common/PomodoroModal';
+import { FlexibleStudyTimerModal } from './components/timer/FlexibleStudyTimerModal';
+import { LoginView } from './components/auth/LoginView';
 import { ToastContainer } from './components/common/ToastContainer';
 import { DataManagementModal } from './components/common/DataManagementModal';
 
@@ -80,8 +81,9 @@ const MainLayout = () => {
         </main>
       </div>
 
-      {/* Global Modals & Notifications */}
-      <PomodoroModal />
+      {/* Global Modals & Authentication */}
+      <FlexibleStudyTimerModal />
+      <LoginView />
       <DataManagementModal />
       <ToastContainer />
     </div>

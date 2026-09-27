@@ -120,42 +120,182 @@ export const StudionProvider = ({ children }) => {
     localStorage.setItem('studion_notes', JSON.stringify(notes));
   }, [notes]);
 
-  // Pomodoro Focus Timer
-  const [pomodoroOpen, setPomodoroOpen] = useState(false);
-  const [pomoMode, setPomoMode] = useState('work'); // work (25m), shortBreak (5m), longBreak (15m)
-  const [pomoSecondsLeft, setPomoSecondsLeft] = useState(25 * 60);
-  const [pomoRunning, setPomoRunning] = useState(false);
-  const [pomoSessions, setPomoSessions] = useState(2);
+  // User Authentication State
+  const [currentUser, setCurrentUser] = useState(() => {
+    const saved = localStorage.getItem('studion_user');
+    return saved
+      ? JSON.parse(saved)
+      : {
+          name: 'Alex Rivera',
+          email: 'alex.rivera@university.edu',
+          major: "Computer Science '26",
+          avatar: '/assets/student-avatar.jpg',
+          isLoggedIn: true
+        };
+  });
+  const [showAuthView, setShowAuthView] = useState(false);
 
   useEffect(() => {
+    if (currentUser) {
+      localStorage.setItem('studion_user', JSON.stringify(currentUser));
+    } else {
+      localStorage.removeItem('studion_user');
+    }
+  }, [currentUser]);
+
+  const loginUser = (email, password, rememberMe = true) => {
+    const user = {
+      name: email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      email,
+      major: "Computer Science '26",
+      avatar: '/assets/student-avatar.jpg',
+      isLoggedIn: true
+    };
+    setCurrentUser(user);
+    if (rememberMe) {
+      localStorage.setItem('studion_user', JSON.stringify(user));
+    }
+    setShowAuthView(false);
+    triggerConfetti();
+    addToast(`Welcome back, ${user.name}! Ready to study?`, 'success');
+  };
+
+  const signupUser = (name, email, password, major = 'Computer Science') => {
+    const user = {
+      name,
+      email,
+      major,
+      avatar: '/assets/student-avatar.jpg',
+      isLoggedIn: true
+    };
+    setCurrentUser(user);
+    localStorage.setItem('studion_user', JSON.stringify(user));
+    setShowAuthView(false);
+    triggerConfetti();
+    addToast(`Account created! Welcome to Studion, ${name}.`, 'success');
+  };
+
+  const logoutUser = () => {
+    setCurrentUser({
+      name: 'Guest Student',
+      email: '',
+      major: 'Guest Session',
+      avatar: '/assets/student-avatar.jpg',
+      isLoggedIn: false
+    });
+    localStorage.removeItem('studion_user');
+    setShowAuthView(true);
+    addToast('Logged out of Studion.', 'info');
+  };
+
+  // Flexible Study Timer State
+  const [timerModalOpen, setTimerModalOpen] = useState(false);
+  const [timerHours, setTimerHours] = useState(0);
+  const [timerMinutes, setTimerMinutes] = useState(45);
+  const [timerTotalSeconds, setTimerTotalSeconds] = useState(45 * 60);
+  const [timerSecondsLeft, setTimerSecondsLeft] = useState(45 * 60);
+  const [timerRunning, setTimerRunning] = useState(false);
+  const [timerSessionLabel, setTimerSessionLabel] = useState('Deep Focus Sprint');
+  const [timerAlertActive, setTimerAlertActive] = useState(false);
+  const [timerSessionsCompleted, setTimerSessionsCompleted] = useState(3);
+
+  // Synthesize pleasant acoustic chime using Web Audio API
+  const playTimerChime = () => {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const now = ctx.currentTime;
+
+      // Chord Tone 1 (D5 - 587.33Hz)
+      const osc1 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(587.33, now);
+      gain1.gain.setValueAtTime(0.25, now);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      osc1.start(now);
+      osc1.stop(now + 1.2);
+
+      // Chord Tone 2 (A5 - 880Hz)
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(880, now + 0.25);
+      gain2.gain.setValueAtTime(0.3, now + 0.25);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 1.8);
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      osc2.start(now + 0.25);
+      osc2.stop(now + 1.8);
+    } catch {
+      // Audio autoplay policy fallback
+    }
+  };
+
+  // Flexible timer countdown ticker
+  useEffect(() => {
     let interval = null;
-    if (pomoRunning && pomoSecondsLeft > 0) {
+    if (timerRunning && timerSecondsLeft > 0) {
       interval = setInterval(() => {
-        setPomoSecondsLeft((prev) => prev - 1);
+        setTimerSecondsLeft((prev) => prev - 1);
       }, 1000);
-    } else if (pomoSecondsLeft === 0 && pomoRunning) {
-      setPomoRunning(false);
+    } else if (timerSecondsLeft === 0 && timerRunning) {
+      setTimerRunning(false);
+      setTimerAlertActive(true);
+      setTimerSessionsCompleted((s) => s + 1);
+      playTimerChime();
       triggerConfetti();
-      if (pomoMode === 'work') {
-        setPomoSessions((s) => s + 1);
-        addToast('🎉 Pomodoro study session complete! Time for a short break.', 'success');
-        setPomoMode('shortBreak');
-        setPomoSecondsLeft(5 * 60);
-      } else {
-        addToast('⚡ Break finished! Ready to get back into focus mode?', 'info');
-        setPomoMode('work');
-        setPomoSecondsLeft(25 * 60);
-      }
+      addToast(`🎉 Session Complete: "${timerSessionLabel}" time is up!`, 'success');
     }
     return () => clearInterval(interval);
-  }, [pomoRunning, pomoSecondsLeft, pomoMode]);
+  }, [timerRunning, timerSecondsLeft, timerSessionLabel]);
 
-  const switchPomoMode = (mode) => {
-    setPomoMode(mode);
-    setPomoRunning(false);
-    if (mode === 'work') setPomoSecondsLeft(25 * 60);
-    else if (mode === 'shortBreak') setPomoSecondsLeft(5 * 60);
-    else if (mode === 'longBreak') setPomoSecondsLeft(15 * 60);
+  // Set custom timer parameters
+  const setFlexibleTimerDuration = (hours, minutes, label = 'Custom Study Session') => {
+    const validHours = Math.max(0, Math.min(12, Number(hours) || 0));
+    const validMinutes = Math.max(0, Math.min(59, Number(minutes) || 0));
+    const totalSecs = (validHours * 3600) + (validMinutes * 60) || 60; // minimum 1 min
+
+    setTimerHours(validHours);
+    setTimerMinutes(validMinutes);
+    setTimerTotalSeconds(totalSecs);
+    setTimerSecondsLeft(totalSecs);
+    setTimerRunning(false);
+    setTimerAlertActive(false);
+    if (label) setTimerSessionLabel(label);
+  };
+
+  const adjustTimerMinutes = (deltaMinutes) => {
+    setTimerSecondsLeft((prev) => {
+      const updated = Math.max(60, prev + deltaMinutes * 60);
+      setTimerTotalSeconds((tot) => Math.max(updated, tot));
+      return updated;
+    });
+  };
+
+  const startFlexibleTimer = () => {
+    if (timerSecondsLeft <= 0) {
+      setTimerSecondsLeft(timerTotalSeconds);
+    }
+    setTimerAlertActive(false);
+    setTimerRunning(true);
+  };
+
+  const pauseFlexibleTimer = () => {
+    setTimerRunning(false);
+  };
+
+  const resetFlexibleTimer = () => {
+    setTimerRunning(false);
+    setTimerAlertActive(false);
+    setTimerSecondsLeft(timerTotalSeconds);
+  };
+
+  const dismissTimerAlert = () => {
+    setTimerAlertActive(false);
   };
 
   // Task Actions
@@ -630,16 +770,52 @@ export const StudionProvider = ({ children }) => {
         togglePinNote,
         sharedVaultNotes,
         forkSharedNote,
-        // Pomodoro
-        pomodoroOpen,
-        setPomodoroOpen,
-        pomoMode,
-        switchPomoMode,
-        pomoSecondsLeft,
-        setPomoSecondsLeft,
-        pomoRunning,
-        setPomoRunning,
-        pomoSessions,
+        // Authentication
+        currentUser,
+        setCurrentUser,
+        showAuthView,
+        setShowAuthView,
+        loginUser,
+        signupUser,
+        logoutUser,
+        // Flexible Study Timer
+        timerModalOpen,
+        setTimerModalOpen,
+        timerHours,
+        timerMinutes,
+        timerTotalSeconds,
+        timerSecondsLeft,
+        timerRunning,
+        timerSessionLabel,
+        timerAlertActive,
+        timerSessionsCompleted,
+        setFlexibleTimerDuration,
+        adjustTimerMinutes,
+        startFlexibleTimer,
+        pauseFlexibleTimer,
+        resetFlexibleTimer,
+        dismissTimerAlert,
+        playTimerChime,
+        // Backwards compatibility aliases
+        pomodoroOpen: timerModalOpen,
+        setPomodoroOpen: setTimerModalOpen,
+        pomoSecondsLeft: timerSecondsLeft,
+        setPomoSecondsLeft: (val) => {
+          if (typeof val === 'function') {
+            setTimerSecondsLeft(val);
+          } else {
+            setTimerSecondsLeft(val);
+          }
+        },
+        pomoRunning: timerRunning,
+        setPomoRunning: (val) => {
+          if (typeof val === 'function') {
+            setTimerRunning(val);
+          } else {
+            setTimerRunning(val);
+          }
+        },
+        pomoSessions: timerSessionsCompleted,
         // Toasts & feedback
         toasts,
         addToast,

@@ -29,10 +29,11 @@ export const DashboardView = () => {
     notes,
     setActiveTab,
     setActiveNoteId,
-    setPomodoroOpen,
-    setPomoRunning,
+    setTimerModalOpen,
+    startFlexibleTimer,
     openDataModal,
     restoreDefaultData,
+    currentUser,
   } = useStudion();
 
   // Calculations
@@ -89,7 +90,7 @@ export const DashboardView = () => {
               <span>Fall Semester 2026 • Finals Sprint</span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-              {getGreeting()}, <span className="text-glow-purple text-purple-400">Alex</span> 👋
+              {getGreeting()}, <span className="text-glow-purple text-purple-400">{currentUser?.name || 'Alex'}</span> 👋
             </h1>
             <p className="mt-2 text-sm sm:text-base text-gray-300 leading-relaxed">
               You have <span className="text-purple-300 font-bold">{tasks.length - completedTasks} tasks</span> and{' '}
@@ -100,8 +101,8 @@ export const DashboardView = () => {
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <button
                 onClick={() => {
-                  setPomodoroOpen(true);
-                  setPomoRunning(true);
+                  setTimerModalOpen(true);
+                  startFlexibleTimer();
                 }}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-700 via-purple-600 to-indigo-600 hover:from-purple-600 hover:to-purple-500 text-white text-xs font-bold shadow-glow-md hover:shadow-glow-lg transition-all active:scale-95"
                 id="hero-start-focus-btn"

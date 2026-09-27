@@ -25,6 +25,8 @@ export const Sidebar = () => {
     assignments,
     habits,
     openDataModal,
+    currentUser,
+    setShowAuthView,
   } = useStudion();
 
   const pendingTasksCount = tasks.filter((t) => !t.completed).length;
@@ -189,36 +191,53 @@ export const Sidebar = () => {
         </button>
 
         {!sidebarCollapsed ? (
-          <div className="flex items-center gap-3 p-2 rounded-xl bg-[#161724] border border-[#26283b] hover:border-purple-500/40 transition-colors">
-            <img
-              src="/assets/student-avatar.jpg"
-              alt="Alex Rivera"
-              className="w-10 h-10 rounded-full object-cover ring-2 ring-purple-500/40"
-              onError={(e) => {
-                e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80';
-              }}
-            />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5">
-                <p className="text-xs font-bold text-white truncate">Alex Rivera</p>
-                <Sparkles className="w-3 h-3 text-purple-400 shrink-0" />
+          currentUser?.isLoggedIn ? (
+            <div
+              onClick={() => setShowAuthView(true)}
+              className="flex items-center gap-3 p-2 rounded-xl bg-[#161724] border border-[#26283b] hover:border-purple-500/60 transition-all cursor-pointer group shadow-sm"
+              title="Click to switch account or manage profile"
+            >
+              <img
+                src={currentUser.avatar || '/assets/student-avatar.jpg'}
+                alt={currentUser.name}
+                className="w-10 h-10 rounded-full object-cover ring-2 ring-purple-500/40 group-hover:ring-purple-400"
+                onError={(e) => {
+                  e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80';
+                }}
+              />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <p className="text-xs font-bold text-white truncate group-hover:text-purple-300 transition-colors">
+                    {currentUser.name}
+                  </p>
+                  <Sparkles className="w-3 h-3 text-purple-400 shrink-0" />
+                </div>
+                <p className="text-[11px] text-gray-400 truncate">{currentUser.major || "Scholar"}</p>
               </div>
-              <p className="text-[11px] text-gray-400 truncate">Computer Science &apos;26</p>
+              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-bold group-hover:bg-purple-500/30">
+                ★
+              </div>
             </div>
-            <div className="flex items-center justify-center w-6 h-6 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-bold">
-              ★
-            </div>
-          </div>
+          ) : (
+            <button
+              onClick={() => setShowAuthView(true)}
+              className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(138,43,226,0.4)] transition-all active:scale-95"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Log In / Sign Up</span>
+            </button>
+          )
         ) : (
           <div className="flex justify-center">
             <img
-              src="/assets/student-avatar.jpg"
-              alt="Alex Rivera"
-              className="w-10 h-10 rounded-full object-cover ring-2 ring-purple-500/40 hover:ring-purple-400 cursor-pointer"
+              onClick={() => setShowAuthView(true)}
+              src={currentUser?.avatar || '/assets/student-avatar.jpg'}
+              alt={currentUser?.name || 'Scholar'}
+              className="w-10 h-10 rounded-full object-cover ring-2 ring-purple-500/40 hover:ring-purple-400 cursor-pointer transition-all"
               onError={(e) => {
                 e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80';
               }}
-              title="Alex Rivera - CS '26"
+              title={currentUser?.isLoggedIn ? `${currentUser.name} - ${currentUser.major}` : 'Log In'}
             />
           </div>
         )}

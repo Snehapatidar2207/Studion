@@ -16,7 +16,11 @@ import {
   Sparkles,
   RotateCcw,
   Upload,
-  HardDrive
+  HardDrive,
+  User,
+  LogIn,
+  LogOut,
+  ChevronDown
 } from 'lucide-react';
 import { useStudion } from '../../context/StudionContext';
 
@@ -30,22 +34,28 @@ export const Header = ({ onOpenMobileMenu }) => {
     resources,
     setActiveTab,
     setActiveNoteId,
-    pomoSecondsLeft,
-    pomoRunning,
-    setPomoRunning,
-    setPomodoroOpen,
-    pomoMode,
+    timerSecondsLeft,
+    timerRunning,
+    timerSessionLabel,
+    startFlexibleTimer,
+    pauseFlexibleTimer,
+    setTimerModalOpen,
     addTask,
     addAssignment,
     createNote,
     openDataModal,
+    currentUser,
+    setShowAuthView,
+    logoutUser,
   } = useStudion();
 
   const [searchFocused, setSearchFocused] = useState(false);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const quickAddRef = useRef(null);
   const notifRef = useRef(null);
+  const userMenuRef = useRef(null);
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -56,15 +66,22 @@ export const Header = ({ onOpenMobileMenu }) => {
       if (notifRef.current && !notifRef.current.contains(e.target)) {
         setNotificationsOpen(false);
       }
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+        setUserMenuOpen(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Format seconds to mm:ss
+  // Format seconds to hh:mm:ss or mm:ss
   const formatTime = (secs) => {
-    const mins = Math.floor(secs / 60);
+    const hours = Math.floor(secs / 3600);
+    const mins = Math.floor((secs % 3600) / 60);
     const s = secs % 60;
+    if (hours > 0) {
+      return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
     return `${mins.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
@@ -185,27 +202,27 @@ export const Header = ({ onOpenMobileMenu }) => {
 
       {/* Right controls: Pomodoro, Quick Add, Notifications */}
       <div className="flex items-center gap-3 sm:gap-4">
-        {/* Quick Pomodoro Widget */}
+        {/* Quick Flexible Timer Widget */}
         <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#161726] border border-purple-500/30 hover:border-purple-500/60 shadow-sm transition-all group">
           <button
-            onClick={() => setPomodoroOpen(true)}
+            onClick={() => setTimerModalOpen(true)}
             className="flex items-center gap-2 text-xs font-semibold text-purple-300 hover:text-white"
-            title="Open Pomodoro Focus Timer"
-            id="header-pomo-btn"
+            title="Open Flexible Study Focus Timer"
+            id="header-timer-btn"
           >
-            <Timer className="w-4 h-4 text-purple-400 animate-pulse-slow" />
-            <span className="capitalize">{pomoMode === 'work' ? 'Focus' : 'Break'}:</span>
+            <Timer className={`w-4 h-4 ${timerRunning ? 'text-purple-400 animate-pulse' : 'text-zinc-400'}`} />
+            <span className="capitalize max-w-[90px] truncate">{timerSessionLabel || 'Focus'}:</span>
             <span className="font-mono text-white text-sm font-bold tracking-wider">
-              {formatTime(pomoSecondsLeft)}
+              {formatTime(timerSecondsLeft)}
             </span>
           </button>
           <div className="h-4 w-[1px] bg-[#2a2c42]" />
           <button
-            onClick={() => setPomoRunning(!pomoRunning)}
+            onClick={() => (timerRunning ? pauseFlexibleTimer() : startFlexibleTimer())}
             className="p-1 rounded-lg text-purple-300 hover:text-white hover:bg-purple-600/30 transition-colors"
-            title={pomoRunning ? 'Pause' : 'Start Focus'}
+            title={timerRunning ? 'Pause' : 'Start Focus'}
           >
-            {pomoRunning ? (
+            {timerRunning ? (
               <Pause className="w-3.5 h-3.5 fill-current" />
             ) : (
               <Play className="w-3.5 h-3.5 fill-current" />
@@ -351,6 +368,81 @@ export const Header = ({ onOpenMobileMenu }) => {
                     <p className="text-[11px] text-gray-400">{n.time}</p>
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* User Account / Auth Widget */}
+        <div className="relative" ref={userMenuRef}>
+          {currentUser?.isLoggedIn ? (
+            <button
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              id="header-user-btn"
+              className="flex items-center gap-2 p-1 sm:px-2.5 sm:py-1 rounded-xl bg-[#151624] hover:bg-[#1a1b2c] border border-purple-500/30 hover:border-purple-500/60 transition-all group shadow-sm"
+              title={`${currentUser.name} (${currentUser.email})`}
+            >
+              <img
+                src={currentUser.avatar || '/assets/student-avatar.jpg'}
+                alt={currentUser.name}
+                className="w-7 h-7 rounded-lg object-cover ring-1 ring-purple-500/50"
+                onError={(e) => {
+                  e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80';
+                }}
+              />
+              <span className="hidden sm:inline text-xs font-semibold text-zinc-200 group-hover:text-white max-w-[100px] truncate">
+                {currentUser.name}
+              </span>
+              <ChevronDown className="w-3.5 h-3.5 text-zinc-400 group-hover:text-white transition-transform" />
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowAuthView(true)}
+              id="header-login-btn"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 shadow-[0_0_15px_rgba(138,43,226,0.5)] hover:shadow-[0_0_25px_rgba(138,43,226,0.8)] transition-all active:scale-95"
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              <span>Log In</span>
+            </button>
+          )}
+
+          {/* User profile dropdown */}
+          {userMenuOpen && currentUser?.isLoggedIn && (
+            <div className="absolute right-0 mt-2 w-64 p-3 bg-[#151624] border border-[#2c2e46] rounded-2xl shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-150 space-y-2.5">
+              <div className="flex items-center gap-3 pb-2.5 border-b border-[#222436]">
+                <img
+                  src={currentUser.avatar || '/assets/student-avatar.jpg'}
+                  alt={currentUser.name}
+                  className="w-10 h-10 rounded-xl object-cover ring-2 ring-purple-500/40"
+                />
+                <div className="min-w-0">
+                  <div className="text-xs font-bold text-white truncate">{currentUser.name}</div>
+                  <div className="text-[11px] text-zinc-400 truncate">{currentUser.email}</div>
+                  <div className="text-[10px] text-purple-400 font-medium truncate">{currentUser.major}</div>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <button
+                  onClick={() => {
+                    setShowAuthView(true);
+                    setUserMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-zinc-300 hover:text-white hover:bg-purple-600/20 rounded-xl transition text-left"
+                >
+                  <User className="w-4 h-4 text-purple-400" />
+                  <span>Switch Account / Sign In</span>
+                </button>
+                <button
+                  onClick={() => {
+                    logoutUser();
+                    setUserMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-rose-300 hover:text-white hover:bg-rose-500/20 rounded-xl transition text-left"
+                >
+                  <LogOut className="w-4 h-4 text-rose-400" />
+                  <span>Log Out</span>
+                </button>
               </div>
             </div>
           )}
