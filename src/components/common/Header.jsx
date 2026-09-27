@@ -444,12 +444,23 @@ export const Header = ({ onOpenMobileMenu }) => {
               <div className="space-y-1">
                 <button
                   onClick={() => {
+                    setActiveTab('profile');
+                    setUserMenuOpen(false);
+                  }}
+                  id="header-profile-link"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-zinc-200 hover:text-white hover:bg-purple-600/25 rounded-xl transition text-left font-medium"
+                >
+                  <User className="w-4 h-4 text-purple-400" />
+                  <span>View & Edit Profile</span>
+                </button>
+                <button
+                  onClick={() => {
                     setShowAuthView(true);
                     setUserMenuOpen(false);
                   }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-zinc-300 hover:text-white hover:bg-purple-600/20 rounded-xl transition text-left"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-zinc-400 hover:text-white hover:bg-purple-600/20 rounded-xl transition text-left"
                 >
-                  <User className="w-4 h-4 text-purple-400" />
+                  <LogIn className="w-4 h-4 text-purple-400" />
                   <span>Switch Account / Sign In</span>
                 </button>
                 <button

@@ -7,6 +7,7 @@ import {
   Bookmark,
   Flame,
   FileText,
+  User,
   ChevronLeft,
   ChevronRight,
   Sparkles,
@@ -80,6 +81,12 @@ export const Sidebar = () => {
       icon: FileText,
       badge: 'Collab',
       badgeColor: 'bg-purple-500/20 text-purple-200 border-purple-400/30',
+    },
+    {
+      id: 'profile',
+      label: 'My Profile',
+      icon: User,
+      badge: null,
     },
   ];
 
@@ -193,14 +200,15 @@ export const Sidebar = () => {
         {!sidebarCollapsed ? (
           currentUser?.isLoggedIn ? (
             <div
-              onClick={() => setShowAuthView(true)}
-              className="flex items-center gap-3 p-2 rounded-xl bg-[#161724] border border-[#26283b] hover:border-purple-500/60 transition-all cursor-pointer group shadow-sm"
-              title="Click to switch account or manage profile"
+              onClick={() => setActiveTab('profile')}
+              id="sidebar-profile-card"
+              className="flex items-center gap-3 p-2 rounded-xl bg-[#161724] border border-[#26283b] hover:border-purple-500/60 transition-all cursor-pointer group shadow-sm hover:bg-[#1a1b2b]"
+              title="Click to view & edit your student profile"
             >
               <img
                 src={currentUser.avatar || '/assets/student-avatar.jpg'}
                 alt={currentUser.name}
-                className="w-10 h-10 rounded-full object-cover ring-2 ring-purple-500/40 group-hover:ring-purple-400"
+                className="w-10 h-10 rounded-full object-cover ring-2 ring-purple-500/40 group-hover:ring-purple-400 shrink-0"
                 onError={(e) => {
                   e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80';
                 }}
@@ -230,14 +238,20 @@ export const Sidebar = () => {
         ) : (
           <div className="flex justify-center">
             <img
-              onClick={() => setShowAuthView(true)}
+              onClick={() => {
+                if (currentUser?.isLoggedIn) {
+                  setActiveTab('profile');
+                } else {
+                  setShowAuthView(true);
+                }
+              }}
               src={currentUser?.avatar || '/assets/student-avatar.jpg'}
               alt={currentUser?.name || 'Scholar'}
               className="w-10 h-10 rounded-full object-cover ring-2 ring-purple-500/40 hover:ring-purple-400 cursor-pointer transition-all"
               onError={(e) => {
                 e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80';
               }}
-              title={currentUser?.isLoggedIn ? `${currentUser.name} - ${currentUser.major}` : 'Log In'}
+              title={currentUser?.isLoggedIn ? `${currentUser.name} - View Profile` : 'Log In'}
             />
           </div>
         )}

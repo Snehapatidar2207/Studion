@@ -133,18 +133,34 @@ export const StudionProvider = ({ children }) => {
     localStorage.setItem('studion_notes', JSON.stringify(notes));
   }, [notes]);
 
-  // User Authentication State (ready for student's own name and email)
+  // User Authentication & Profile State (student profile & preferences)
+  const defaultUserProfile = {
+    name: 'Alex Rivera',
+    email: 'alex.rivera@studion.edu',
+    major: 'Computer Science',
+    university: 'Stanford University',
+    semester: 'Semester 4 (Year 2)',
+    avatar: '/assets/student-avatar.jpg',
+    notificationsEnabled: true,
+    isLoggedIn: true
+  };
+
   const [currentUser, setCurrentUser] = useState(() => {
     const saved = localStorage.getItem('studion_user');
-    return saved
-      ? JSON.parse(saved)
-      : {
-          name: 'Scholar',
-          email: '',
-          major: 'Student',
-          avatar: '/assets/student-avatar.jpg',
-          isLoggedIn: false
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return {
+          ...defaultUserProfile,
+          ...parsed,
+          name: parsed.name || defaultUserProfile.name,
+          email: parsed.email || defaultUserProfile.email,
         };
+      } catch {
+        return defaultUserProfile;
+      }
+    }
+    return defaultUserProfile;
   });
   const [showAuthView, setShowAuthView] = useState(false);
 
@@ -156,12 +172,21 @@ export const StudionProvider = ({ children }) => {
     }
   }, [currentUser]);
 
+  const updateUserProfile = (updatedFields) => {
+    setCurrentUser((prev) => {
+      const merged = { ...prev, ...updatedFields };
+      localStorage.setItem('studion_user', JSON.stringify(merged));
+      return merged;
+    });
+    triggerConfetti();
+    addToast('Profile changes saved successfully!', 'success');
+  };
+
   const loginUser = (email, password, rememberMe = true) => {
     const user = {
+      ...defaultUserProfile,
       name: email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
       email,
-      major: "Student",
-      avatar: '/assets/student-avatar.jpg',
       isLoggedIn: true
     };
     setCurrentUser(user);
@@ -175,10 +200,10 @@ export const StudionProvider = ({ children }) => {
 
   const signupUser = (name, email, password, major = 'Computer Science') => {
     const user = {
+      ...defaultUserProfile,
       name,
       email,
       major,
-      avatar: '/assets/student-avatar.jpg',
       isLoggedIn: true
     };
     setCurrentUser(user);
@@ -190,10 +215,7 @@ export const StudionProvider = ({ children }) => {
 
   const logoutUser = () => {
     setCurrentUser({
-      name: 'Scholar',
-      email: '',
-      major: 'Guest Session',
-      avatar: '/assets/student-avatar.jpg',
+      ...defaultUserProfile,
       isLoggedIn: false
     });
     localStorage.removeItem('studion_user');
@@ -791,9 +813,10 @@ export const StudionProvider = ({ children }) => {
         togglePinNote,
         sharedVaultNotes,
         forkSharedNote,
-        // Authentication
+        // Authentication & Profile
         currentUser,
         setCurrentUser,
+        updateUserProfile,
         showAuthView,
         setShowAuthView,
         loginUser,

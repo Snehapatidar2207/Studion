@@ -15,6 +15,7 @@ import { FlashcardsView } from './components/flashcards/FlashcardsView';
 import { ResourcesView } from './components/resources/ResourcesView';
 import { HabitsView } from './components/habits/HabitsView';
 import { NotesView } from './components/notes/NotesView';
+import { ProfileView } from './components/profile/ProfileView';
 
 const MainLayout = () => {
   const { activeTab, sidebarCollapsed } = useStudion();
@@ -36,6 +37,8 @@ const MainLayout = () => {
         return <HabitsView />;
       case 'notes':
         return <NotesView />;
+      case 'profile':
+        return <ProfileView />;
       default:
         return <DashboardView />;
     }
