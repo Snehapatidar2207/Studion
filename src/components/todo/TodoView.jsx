@@ -196,7 +196,21 @@ export const TodoView = () => {
 
       {/* Task List Items */}
       <div className="space-y-2.5">
-        {filteredTasks.length === 0 ? (
+        {tasks.length === 0 ? (
+          <div className="text-center py-16 p-8 rounded-3xl bg-[#141524] border border-[#23253b] space-y-4">
+            <CheckCircle2 className="w-14 h-14 text-purple-400/40 mx-auto" />
+            <h3 className="text-lg font-bold text-white">Your study to-do list is empty</h3>
+            <p className="text-xs sm:text-sm text-gray-400 max-w-md mx-auto">
+              Plan your study blocks, assignments, readings, and lecture reviews. Add your first task below!
+            </p>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold shadow-[0_0_20px_rgba(138,43,226,0.5)] transition-all"
+            >
+              + Create First Task
+            </button>
+          </div>
+        ) : filteredTasks.length === 0 ? (
           <div className="text-center py-12 p-8 rounded-2xl bg-[#141524] border border-[#23253b] space-y-3">
             <CheckCircle2 className="w-12 h-12 text-purple-400/40 mx-auto" />
             <h3 className="text-base font-bold text-white">No tasks match your criteria</h3>

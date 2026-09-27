@@ -71,7 +71,7 @@ export const Sidebar = () => {
       id: 'habits',
       label: 'Habit Tracker',
       icon: Flame,
-      badge: `${activeHabitStreak}d 🔥`,
+      badge: activeHabitStreak > 0 ? `${activeHabitStreak}d 🔥` : null,
       badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
     },
     {

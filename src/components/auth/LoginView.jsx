@@ -34,9 +34,9 @@ export const LoginView = () => {
   // Mode: 'login' | 'signup' | 'forgot'
   const [authMode, setAuthMode] = useState('login');
 
-  // Login form state
-  const [loginEmail, setLoginEmail] = useState('alex.rivera@university.edu');
-  const [loginPassword, setLoginPassword] = useState('studion2026!');
+  // Login form state (empty for student's own credentials)
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -279,7 +279,7 @@ export const LoginView = () => {
                 alt="Student user"
                 className="w-7 h-7 rounded-full border border-purple-400/40 object-cover"
               />
-              <span className="text-zinc-300 font-medium">Alex Rivera & 50k+ scholars</span>
+              <span className="text-zinc-300 font-medium">Joined by 50k+ active scholars</span>
             </div>
             <span className="text-purple-300/80 font-mono text-[11px]">⚡ 99.4% Focus Score</span>
           </div>

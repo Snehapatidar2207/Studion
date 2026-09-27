@@ -8,8 +8,21 @@ import {
   initialHabits,
   initialFolders,
   initialNotes,
-  initialSharedVaultNotes
+  initialSharedVaultNotes,
+  sampleStudyDataset
 } from '../data/mockData';
+
+// One-time purge of existing local storage so students start with an empty workspace
+if (typeof window !== 'undefined' && !localStorage.getItem('studion_clean_slate_v2')) {
+  localStorage.removeItem('studion_tasks');
+  localStorage.removeItem('studion_assignments');
+  localStorage.removeItem('studion_decks');
+  localStorage.removeItem('studion_resources');
+  localStorage.removeItem('studion_habits');
+  localStorage.removeItem('studion_notes');
+  localStorage.removeItem('studion_folders');
+  localStorage.setItem('studion_clean_slate_v2', 'true');
+}
 
 const StudionContext = createContext(null);
 
@@ -19,48 +32,48 @@ export const StudionProvider = ({ children }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [globalSearch, setGlobalSearch] = useState('');
 
-  // To-Dos
+  // To-Dos (starts empty for student)
   const [tasks, setTasks] = useState(() => {
     const saved = localStorage.getItem('studion_tasks');
-    return saved ? JSON.parse(saved) : initialTasks;
+    return saved ? JSON.parse(saved) : [];
   });
 
-  // Assignments
+  // Assignments (starts empty for student)
   const [assignments, setAssignments] = useState(() => {
     const saved = localStorage.getItem('studion_assignments');
-    return saved ? JSON.parse(saved) : initialAssignments;
+    return saved ? JSON.parse(saved) : [];
   });
 
-  // Flashcards
+  // Flashcards (starts empty for student)
   const [decks, setDecks] = useState(() => {
     const saved = localStorage.getItem('studion_decks');
-    return saved ? JSON.parse(saved) : initialDecks;
+    return saved ? JSON.parse(saved) : [];
   });
-  const [activeDeckId, setActiveDeckId] = useState(initialDecks[0]?.id || '');
+  const [activeDeckId, setActiveDeckId] = useState('');
 
-  // Resources
+  // Resources (starts empty for student)
   const [resources, setResources] = useState(() => {
     const saved = localStorage.getItem('studion_resources');
-    return saved ? JSON.parse(saved) : initialResources;
+    return saved ? JSON.parse(saved) : [];
   });
 
-  // Habits
+  // Habits (starts empty for student)
   const [habits, setHabits] = useState(() => {
     const saved = localStorage.getItem('studion_habits');
-    return saved ? JSON.parse(saved) : initialHabits;
+    return saved ? JSON.parse(saved) : [];
   });
 
-  // Notes
+  // Notes (starts empty for student)
   const [notes, setNotes] = useState(() => {
     const saved = localStorage.getItem('studion_notes');
-    return saved ? JSON.parse(saved) : initialNotes;
+    return saved ? JSON.parse(saved) : [];
   });
   const [folders, setFolders] = useState(() => {
     const saved = localStorage.getItem('studion_folders');
-    return saved ? JSON.parse(saved) : initialFolders;
+    return saved ? JSON.parse(saved) : [];
   });
-  const [activeNoteId, setActiveNoteId] = useState(initialNotes[0]?.id || '');
-  const [sharedVaultNotes, setSharedVaultNotes] = useState(initialSharedVaultNotes);
+  const [activeNoteId, setActiveNoteId] = useState('');
+  const [sharedVaultNotes, setSharedVaultNotes] = useState([]);
 
   // Data & Reset Modal State
   const [dataModalOpen, setDataModalOpen] = useState(false);
@@ -120,17 +133,17 @@ export const StudionProvider = ({ children }) => {
     localStorage.setItem('studion_notes', JSON.stringify(notes));
   }, [notes]);
 
-  // User Authentication State
+  // User Authentication State (ready for student's own name and email)
   const [currentUser, setCurrentUser] = useState(() => {
     const saved = localStorage.getItem('studion_user');
     return saved
       ? JSON.parse(saved)
       : {
-          name: 'Alex Rivera',
-          email: 'alex.rivera@university.edu',
-          major: "Computer Science '26",
+          name: 'Scholar',
+          email: '',
+          major: 'Student',
           avatar: '/assets/student-avatar.jpg',
-          isLoggedIn: true
+          isLoggedIn: false
         };
   });
   const [showAuthView, setShowAuthView] = useState(false);
@@ -147,7 +160,7 @@ export const StudionProvider = ({ children }) => {
     const user = {
       name: email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
       email,
-      major: "Computer Science '26",
+      major: "Student",
       avatar: '/assets/student-avatar.jpg',
       isLoggedIn: true
     };
@@ -177,7 +190,7 @@ export const StudionProvider = ({ children }) => {
 
   const logoutUser = () => {
     setCurrentUser({
-      name: 'Guest Student',
+      name: 'Scholar',
       email: '',
       major: 'Guest Session',
       avatar: '/assets/student-avatar.jpg',
@@ -197,7 +210,7 @@ export const StudionProvider = ({ children }) => {
   const [timerRunning, setTimerRunning] = useState(false);
   const [timerSessionLabel, setTimerSessionLabel] = useState('Deep Focus Sprint');
   const [timerAlertActive, setTimerAlertActive] = useState(false);
-  const [timerSessionsCompleted, setTimerSessionsCompleted] = useState(3);
+  const [timerSessionsCompleted, setTimerSessionsCompleted] = useState(0);
 
   // Synthesize pleasant acoustic chime using Web Audio API
   const playTimerChime = () => {
@@ -579,26 +592,34 @@ export const StudionProvider = ({ children }) => {
   };
 
   const restoreDefaultData = () => {
-    setTasks(initialTasks);
-    setAssignments(initialAssignments);
-    setDecks(initialDecks);
-    setActiveDeckId(initialDecks[0]?.id || '');
-    setResources(initialResources);
-    setHabits(initialHabits);
-    setFolders(initialFolders);
-    setNotes(initialNotes);
-    setActiveNoteId(initialNotes[0]?.id || '');
+    const sTasks = sampleStudyDataset.tasks || [];
+    const sAssignments = sampleStudyDataset.assignments || [];
+    const sDecks = sampleStudyDataset.decks || [];
+    const sResources = sampleStudyDataset.resources || [];
+    const sHabits = sampleStudyDataset.habits || [];
+    const sFolders = sampleStudyDataset.folders || [];
+    const sNotes = sampleStudyDataset.notes || [];
 
-    localStorage.setItem('studion_tasks', JSON.stringify(initialTasks));
-    localStorage.setItem('studion_assignments', JSON.stringify(initialAssignments));
-    localStorage.setItem('studion_decks', JSON.stringify(initialDecks));
-    localStorage.setItem('studion_resources', JSON.stringify(initialResources));
-    localStorage.setItem('studion_habits', JSON.stringify(initialHabits));
-    localStorage.setItem('studion_folders', JSON.stringify(initialFolders));
-    localStorage.setItem('studion_notes', JSON.stringify(initialNotes));
+    setTasks(sTasks);
+    setAssignments(sAssignments);
+    setDecks(sDecks);
+    setActiveDeckId(sDecks[0]?.id || '');
+    setResources(sResources);
+    setHabits(sHabits);
+    setFolders(sFolders);
+    setNotes(sNotes);
+    setActiveNoteId(sNotes[0]?.id || '');
+
+    localStorage.setItem('studion_tasks', JSON.stringify(sTasks));
+    localStorage.setItem('studion_assignments', JSON.stringify(sAssignments));
+    localStorage.setItem('studion_decks', JSON.stringify(sDecks));
+    localStorage.setItem('studion_resources', JSON.stringify(sResources));
+    localStorage.setItem('studion_habits', JSON.stringify(sHabits));
+    localStorage.setItem('studion_folders', JSON.stringify(sFolders));
+    localStorage.setItem('studion_notes', JSON.stringify(sNotes));
 
     triggerConfetti();
-    addToast('Default sample study data restored successfully!', 'success');
+    addToast('Sample template study data loaded successfully!', 'success');
   };
 
   const importData = (imported, mode = 'replace') => {

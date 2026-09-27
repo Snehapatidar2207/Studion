@@ -103,32 +103,51 @@ export const Header = ({ onOpenMobileMenu }) => {
       ].slice(0, 6)
     : [];
 
-  const notifications = [
-    {
-      id: 'n-1',
-      title: 'Lab 4 Consensus Deadline',
-      time: 'Due tonight at 11:59 PM',
+  // Dynamic real notifications based on student's actual tasks and assignments
+  const pendingAssignments = assignments
+    .filter((a) => a.progress < 100)
+    .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
+
+  const pendingTasks = tasks.filter((t) => !t.completed);
+
+  const notifications = [];
+  if (pendingAssignments.length > 0) {
+    const nextAsg = pendingAssignments[0];
+    const dueTime = new Date(nextAsg.dueDate).toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric'
+    });
+    notifications.push({
+      id: `asg-${nextAsg.id}`,
+      title: `${nextAsg.course}: ${nextAsg.title}`,
+      time: `Due ${dueTime} • Progress ${nextAsg.progress}%`,
       read: false,
       tag: 'Urgent',
       tagColor: 'text-rose-400 bg-rose-500/20'
-    },
-    {
-      id: 'n-2',
-      title: 'Habit Streak Milestone!',
-      time: 'You hit an 8-day streak on Deep Work',
+    });
+  }
+
+  if (pendingTasks.length > 0) {
+    notifications.push({
+      id: 'task-alert',
+      title: `${pendingTasks.length} Pending Study Tasks`,
+      time: `Next up: ${pendingTasks[0].title}`,
       read: false,
-      tag: 'Streak',
-      tagColor: 'text-amber-400 bg-amber-500/20'
-    },
-    {
-      id: 'n-3',
-      title: 'Shared Note Cloned',
-      time: 'Marcus Chen imported your SVD notes',
-      read: true,
-      tag: 'Social',
+      tag: 'To-Do',
       tagColor: 'text-purple-400 bg-purple-500/20'
-    }
-  ];
+    });
+  }
+
+  if (notifications.length === 0) {
+    notifications.push({
+      id: 'n-welcome',
+      title: 'Welcome to Studion!',
+      time: 'Add your first task, assignment, or note to track deadlines in real-time.',
+      read: false,
+      tag: 'Notice',
+      tagColor: 'text-purple-300 bg-purple-500/20'
+    });
+  }
 
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 py-3.5 bg-[#0e0f18]/85 backdrop-blur-xl border-b border-[#202234]">

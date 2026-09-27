@@ -173,7 +173,22 @@ export const HabitsView = () => {
           </div>
 
           {/* Grid Rows */}
-          {habits.map((habit) => {
+          {habits.length === 0 ? (
+            <div className="text-center py-16 p-8 rounded-2xl bg-[#141524] border border-[#23253b] space-y-3">
+              <Flame className="w-12 h-12 text-amber-400/40 mx-auto" />
+              <h4 className="text-base font-bold text-white">No habits tracked yet</h4>
+              <p className="text-xs text-gray-400 max-w-sm mx-auto">
+                Form positive daily rituals like Deep Work, Flashcard practice, or reading.
+              </p>
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold shadow-[0_0_20px_rgba(138,43,226,0.5)] transition-all"
+              >
+                + Add First Habit
+              </button>
+            </div>
+          ) : (
+            habits.map((habit) => {
             const completedCountThisWeek = habit.completedDays.filter(Boolean).length;
             const habitPercent = Math.round((completedCountThisWeek / 7) * 100);
 
@@ -239,7 +254,8 @@ export const HabitsView = () => {
                 </div>
               </div>
             );
-          })}
+          })
+          )}
         </div>
       </div>
 

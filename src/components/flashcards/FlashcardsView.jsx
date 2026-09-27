@@ -108,6 +108,11 @@ export const FlashcardsView = () => {
   const handleCreateCard = (e) => {
     e.preventDefault();
     if (!newCardFront.trim() || !newCardBack.trim()) return;
+    if (!currentDeck) {
+      addToast('Please create a deck first before adding cards!', 'warning');
+      setIsNewDeckModalOpen(true);
+      return;
+    }
     addCardToDeck(currentDeck.id, newCardFront.trim(), newCardBack.trim());
     setNewCardFront('');
     setNewCardBack('');
@@ -137,7 +142,14 @@ export const FlashcardsView = () => {
             <span>New Deck</span>
           </button>
           <button
-            onClick={() => setIsNewCardModalOpen(true)}
+            onClick={() => {
+              if (decks.length === 0) {
+                addToast('Create your first deck before adding cards!', 'info');
+                setIsNewDeckModalOpen(true);
+              } else {
+                setIsNewCardModalOpen(true);
+              }
+            }}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-700 via-purple-600 to-indigo-600 hover:from-purple-600 hover:to-purple-500 text-white text-xs font-bold shadow-glow-sm hover:shadow-glow-md transition-all active:scale-95"
           >
             <Plus className="w-4 h-4" />
@@ -147,34 +159,50 @@ export const FlashcardsView = () => {
       </div>
 
       {/* Deck Selector Tabs */}
-      <div className="flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-none">
-        {decks.map((deck) => {
-          const isSelected = deck.id === currentDeck?.id;
-          return (
-            <button
-              key={deck.id}
-              onClick={() => {
-                setActiveDeckId(deck.id);
-                setCurrentCardIndex(0);
-              }}
-              className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap border shrink-0 ${
-                isSelected
-                  ? 'bg-purple-600/30 text-white border-purple-500/60 shadow-glow-sm'
-                  : 'bg-[#151624] text-gray-400 hover:text-gray-200 border-[#25273d] hover:border-purple-500/30'
-              }`}
-            >
-              <Brain className="w-4 h-4 text-purple-400" />
-              <span>{deck.name}</span>
-              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-[#202236] text-purple-300">
-                {deck.cards.length}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+      {decks.length > 0 && (
+        <div className="flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-none">
+          {decks.map((deck) => {
+            const isSelected = deck.id === currentDeck?.id;
+            return (
+              <button
+                key={deck.id}
+                onClick={() => {
+                  setActiveDeckId(deck.id);
+                  setCurrentCardIndex(0);
+                }}
+                className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap border shrink-0 ${
+                  isSelected
+                    ? 'bg-purple-600/30 text-white border-purple-500/60 shadow-glow-sm'
+                    : 'bg-[#151624] text-gray-400 hover:text-gray-200 border-[#25273d] hover:border-purple-500/30'
+                }`}
+              >
+                <Brain className="w-4 h-4 text-purple-400" />
+                <span>{deck.name}</span>
+                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-[#202236] text-purple-300">
+                  {deck.cards.length}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Main Flashcard Study Arena */}
-      {cards.length === 0 ? (
+      {decks.length === 0 ? (
+        <div className="text-center py-20 p-8 rounded-3xl bg-[#141524] border border-[#26283e] space-y-4">
+          <Layers className="w-14 h-14 text-cyan-400/40 mx-auto" />
+          <h3 className="text-lg font-bold text-white">No flashcard decks created yet</h3>
+          <p className="text-xs sm:text-sm text-gray-400 max-w-md mx-auto">
+            Build customized study decks for each of your subjects (e.g., Computer Science, Biology, Calculus) and practice with 3D active recall.
+          </p>
+          <button
+            onClick={() => setIsNewDeckModalOpen(true)}
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold shadow-[0_0_20px_rgba(138,43,226,0.5)] transition-all"
+          >
+            + Create First Deck
+          </button>
+        </div>
+      ) : cards.length === 0 ? (
         <div className="text-center py-16 p-8 rounded-3xl bg-[#141524] border border-[#26283e] space-y-4">
           <BookOpen className="w-12 h-12 text-purple-400/40 mx-auto" />
           <h3 className="text-lg font-bold text-white">This deck is currently empty</h3>

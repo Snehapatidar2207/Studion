@@ -179,7 +179,38 @@ export const ResourcesView = () => {
       </div>
 
       {/* Resource Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      {resources.length === 0 ? (
+        <div className="text-center py-16 p-8 rounded-3xl bg-[#141524] border border-[#23253b] space-y-4">
+          <Bookmark className="w-14 h-14 text-purple-400/40 mx-auto" />
+          <h3 className="text-lg font-bold text-white">Your resource vault is empty</h3>
+          <p className="text-xs sm:text-sm text-gray-400 max-w-md mx-auto">
+            Save video lectures, study PDFs, research papers, cheatsheets, and academic bookmarks all in one centralized repository.
+          </p>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold shadow-[0_0_20px_rgba(138,43,226,0.5)] transition-all"
+          >
+            + Add First Resource
+          </button>
+        </div>
+      ) : filteredResources.length === 0 ? (
+        <div className="text-center py-12 p-8 rounded-2xl bg-[#141524] border border-[#23253b] space-y-3">
+          <Bookmark className="w-12 h-12 text-purple-400/40 mx-auto" />
+          <h3 className="text-base font-bold text-white">No resources match your search</h3>
+          <p className="text-xs text-gray-400">Try changing your category filter or clearing the search box.</p>
+          <button
+            onClick={() => {
+              setSelectedCategory('All');
+              setSelectedType('All');
+              setSearchQuery('');
+            }}
+            className="text-xs font-bold text-purple-400 hover:text-purple-300 underline"
+          >
+            Reset Filters
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {filteredResources.map((res) => (
           <div
             key={res.id}
@@ -269,7 +300,8 @@ export const ResourcesView = () => {
             </div>
           </div>
         ))}
-      </div>
+        </div>
+      )}
 
       {/* Add Resource Modal */}
       {isModalOpen && (

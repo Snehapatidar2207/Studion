@@ -24,6 +24,7 @@ export const DashboardView = () => {
     tasks,
     toggleTask,
     assignments,
+    decks,
     habits,
     toggleHabitDay,
     notes,
@@ -87,15 +88,23 @@ export const DashboardView = () => {
           <div className="max-w-xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/15 border border-purple-400/30 text-purple-300 text-xs font-semibold mb-3">
               <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-              <span>Fall Semester 2026 • Finals Sprint</span>
+              <span>Studion Academic OS • Focus Hub</span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-              {getGreeting()}, <span className="text-glow-purple text-purple-400">{currentUser?.name || 'Alex'}</span> 👋
+              {getGreeting()}, <span className="text-glow-purple text-purple-400">{currentUser?.name || 'Scholar'}</span> 👋
             </h1>
             <p className="mt-2 text-sm sm:text-base text-gray-300 leading-relaxed">
-              You have <span className="text-purple-300 font-bold">{tasks.length - completedTasks} tasks</span> and{' '}
-              <span className="text-rose-400 font-bold">{urgentAssignments.length} upcoming deadlines</span> scheduled. Keep up your{' '}
-              <span className="text-amber-400 font-bold">{bestStreak}-day habit streak</span>!
+              {tasks.length === 0 && assignments.length === 0 ? (
+                <>Welcome to your personalized workspace! Your study schedule is clean. Start by adding your courses, assignments, or daily habits below.</>
+              ) : (
+                <>
+                  You have <span className="text-purple-300 font-bold">{tasks.length - completedTasks} tasks</span> and{' '}
+                  <span className="text-rose-400 font-bold">{urgentAssignments.length} upcoming deadlines</span> scheduled.{' '}
+                  {bestStreak > 0 && (
+                    <>Keep up your <span className="text-amber-400 font-bold">{bestStreak}-day habit streak</span>!</>
+                  )}
+                </>
+              )}
             </p>
 
             <div className="mt-6 flex flex-wrap items-center gap-3">
@@ -246,7 +255,7 @@ export const DashboardView = () => {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-white">3</span>
+            <span className="text-3xl font-extrabold text-white">{decks.length}</span>
             <span className="text-xs text-cyan-300 font-medium">Active Decks</span>
           </div>
           <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">
@@ -278,30 +287,18 @@ export const DashboardView = () => {
 
           <div className="space-y-2.5">
             {tasks.length === 0 ? (
-              <div className="p-6 rounded-2xl bg-[#151624] border border-[#23253a] text-center space-y-3">
+              <div className="p-8 rounded-2xl bg-[#151624] border border-[#23253a] text-center space-y-3">
                 <CheckCircle2 className="w-10 h-10 text-purple-400/40 mx-auto" />
-                <h4 className="text-sm font-bold text-white">No tasks scheduled</h4>
-                <p className="text-xs text-gray-400">
-                  Your task list is clean! Add a new task, upload data, or restore sample study items.
+                <h4 className="text-sm font-bold text-white">No tasks scheduled yet</h4>
+                <p className="text-xs text-gray-400 max-w-sm mx-auto">
+                  Your to-do list is clean! Add your first study task to start organizing your daily assignments.
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
                   <button
                     onClick={() => setActiveTab('todos')}
-                    className="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold"
+                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold shadow-[0_0_15px_rgba(138,43,226,0.4)] transition-all"
                   >
-                    + Add Task
-                  </button>
-                  <button
-                    onClick={() => openDataModal('upload')}
-                    className="px-3.5 py-1.5 rounded-xl bg-[#1e2034] hover:bg-[#282a45] text-purple-300 text-xs font-semibold border border-purple-500/30"
-                  >
-                    Upload JSON
-                  </button>
-                  <button
-                    onClick={restoreDefaultData}
-                    className="px-3.5 py-1.5 rounded-xl bg-[#1e2034] hover:bg-[#282a45] text-gray-300 text-xs font-semibold border border-[#2c2e47]"
-                  >
-                    Restore Demo
+                    + Add Study Task
                   </button>
                 </div>
               </div>

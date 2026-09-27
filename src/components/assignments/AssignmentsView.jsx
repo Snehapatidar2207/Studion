@@ -191,26 +191,56 @@ export const AssignmentsView = () => {
       </div>
 
       {/* Assignments Card Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {sortedAssignments.map((asg) => {
-          const countdown = getCountdownInfo(asg.dueDate);
-          const isFinished = asg.progress === 100;
-          const formattedDate = new Date(asg.dueDate).toLocaleDateString(undefined, {
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-          });
+      {assignments.length === 0 ? (
+        <div className="text-center py-16 p-8 rounded-3xl bg-[#141524] border border-[#23253b] space-y-4">
+          <Clock className="w-14 h-14 text-rose-400/40 mx-auto" />
+          <h3 className="text-lg font-bold text-white">No assignments or exams tracked yet</h3>
+          <p className="text-xs sm:text-sm text-gray-400 max-w-md mx-auto">
+            Stay ahead of deadlines, monitor project weights, and track coursework progress.
+          </p>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold shadow-[0_0_20px_rgba(138,43,226,0.5)] transition-all"
+          >
+            + Track First Assignment
+          </button>
+        </div>
+      ) : sortedAssignments.length === 0 ? (
+        <div className="text-center py-12 p-8 rounded-2xl bg-[#141524] border border-[#23253b] space-y-3">
+          <Clock className="w-12 h-12 text-rose-400/40 mx-auto" />
+          <h3 className="text-base font-bold text-white">No assignments match your filter</h3>
+          <p className="text-xs text-gray-400">Try switching your status filter or clearing your search.</p>
+          <button
+            onClick={() => {
+              setFilterStatus('All');
+              setSearchQuery('');
+            }}
+            className="text-xs font-bold text-purple-400 hover:text-purple-300 underline"
+          >
+            Reset Filters
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {sortedAssignments.map((asg) => {
+            const countdown = getCountdownInfo(asg.dueDate);
+            const isFinished = asg.progress === 100;
+            const formattedDate = new Date(asg.dueDate).toLocaleDateString(undefined, {
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+            });
 
-          return (
-            <div
-              key={asg.id}
-              className={`relative flex flex-col justify-between p-5 rounded-2xl border transition-all duration-300 group ${
-                isFinished
-                  ? 'bg-[#12141c]/60 border-[#202236] opacity-75'
-                  : 'bg-[#141524] border-[#26283f] hover:border-purple-500/50 hover:shadow-glow-sm hover:-translate-y-0.5'
-              }`}
-            >
+            return (
+              <div
+                key={asg.id}
+                className={`relative flex flex-col justify-between p-5 rounded-2xl border transition-all duration-300 group ${
+                  isFinished
+                    ? 'bg-[#12141c]/60 border-[#202236] opacity-75'
+                    : 'bg-[#141524] border-[#26283f] hover:border-purple-500/50 hover:shadow-glow-sm hover:-translate-y-0.5'
+                }`}
+              >
               <div>
                 {/* Header row: Course, Type, and Countdown */}
                 <div className="flex items-start justify-between gap-3 mb-3">
@@ -308,6 +338,7 @@ export const AssignmentsView = () => {
           );
         })}
       </div>
+    )}
 
       {/* Add Assignment Modal */}
       {isModalOpen && (
